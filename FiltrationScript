@@ -1,0 +1,123 @@
+Loop:
+yield
+lbn r15 storageHash HASH("OxyStorage") Pressure 0
+lbn r14 filterHash HASH("OxyFilter") OutputPressure 0
+lbn r13 filterHash HASH("OxyFilter") InputPressure 0
+lbn r12 filterHash HASH("OxyFilter") Output2Pressure 0 #wastepressure?
+lbn r11 pipeAnalyzerHash HASH("OxyCanister") Pressure 0
+lbn r10 filterHash HASH("OxyFilter") InputOxygenPercent 0
+move r9 HASH("OxyVent")
+move r8 HASH("OxyFill")
+move r7 HASH("OxyInputVent")
+move r6 HASH("OxyFilter")
+move r5 HASH("OxyWasteVent")
+move r4 HASH("OxyCanFill")
+jal Function
+lbn r15 storageHash HASH("CO2Storage") Pressure 0
+lbn r14 filterHash HASH("CO2Filter") OutputPressure 0
+lbn r13 filterHash HASH("CO2Filter") InputPressure 0
+lbn r12 filterHash HASH("CO2Filter") Output2Pressure 0
+lbn r11 pipeAnalyzerHash HASH("CO2Canister") Pressure 0
+lbn r10 filterHash HASH("CO2Filter") InputCarbonDioxidePercent 0
+move r9 HASH("CO2Vent")
+move r8 HASH("CO2Fill")
+move r7 HASH("CO2InputVent")
+move r6 HASH("CO2Filter")
+move r5 HASH("CO2WasteVent")
+move r4 HASH("CO2CanFill")
+jal Function
+lbn r15 storageHash HASH("N2Storage") Pressure 0
+lbn r14 filterHash HASH("N2Filter") OutputPressure 0
+lbn r13 filterHash HASH("N2Filter") InputPressure 0
+lbn r12 filterHash HASH("N2Filter") Output2Pressure 0
+lbn r11 pipeAnalyzerHash HASH("N2Canister") Pressure 0
+lbn r10 filterHash HASH("N2Filter") InputNitrogenPercent 0
+move r9 HASH("N2Vent")
+move r8 HASH("N2Fill")
+move r7 HASH("N2InputVent")
+move r6 HASH("N2Filter")
+move r5 HASH("N2WasteVent")
+move r4 HASH("N2CanFill")
+jal Function
+lbn r15 storageHash HASH("VolStorage") Pressure 0
+lbn r14 filterHash HASH("VolFilter") OutputPressure 0
+lbn r13 filterHash HASH("VolFilter") InputPressure 0
+lbn r12 filterHash HASH("VolFilter") Output2Pressure 0
+lbn r11 pipeAnalyzerHash HASH("VolCanister") Pressure 0
+lbn r10 filterHash HASH("VolFilter") InputVolatilesPercent 0
+move r9 HASH("VolVent")
+move r8 HASH("VolFill")
+move r7 HASH("VolInputVent")
+move r6 HASH("VolFilter")
+move r5 HASH("VolWasteVent")
+move r4 HASH("VolCanFill")
+jal Function
+lbn r15 storageHash HASH("PolStorage") Pressure 0
+lbn r14 filterHash HASH("PolFilter") OutputPressure 0
+lbn r13 filterHash HASH("PolFilter") InputPressure 0
+lbn r12 filterHash HASH("PolFilter") Output2Pressure 0
+lbn r11 pipeAnalyzerHash HASH("PolCanister") Pressure 0
+lbn r10 filterHash HASH("PolFilter") InputVolatilesPercent 0
+move r9 HASH("PolVent")
+move r8 HASH("PolFill")
+move r7 HASH("PolInputVent")
+move r6 HASH("PolFilter")
+move r5 HASH("PolWasteVent")
+move r4 HASH("PolCanFill")
+jal Function
+lbn r15 storageHash HASH("N2OStorage") Pressure 0
+lbn r14 filterHash HASH("N2OFilter") OutputPressure 0
+lbn r13 filterHash HASH("N2OFilter") InputPressure 0
+lbn r12 filterHash HASH("N2OFilter") Output2Pressure 0
+lbn r11 pipeAnalyzerHash HASH("N2OCanister") Pressure 0
+lbn r10 filterHash HASH("N2OFilter") InputVolatilesPercent 0
+move r9 HASH("N2OVent")
+move r8 HASH("N2OFill")
+move r7 HASH("N2OInputVent")
+move r6 HASH("N2OFilter")
+move r5 HASH("N2OWasteVent")
+move r4 HASH("N2OCanFill")
+jal Function
+lbn r15 pipeAnalyzerHash HASH("N2CO2MixSensor") Pressure 0
+slt r0 r15 45000
+sbn pipeAnalyzerHash HASH("N2CO2Mixer") On r0
+j Loop
+Function:
+sub r0 r15 45000 #subtract storage from 45000 to get difference above 45000
+sbn pumpHash r9 Setting r0 #set "Vent" volume setting
+sgt r0 r15 45000 #set if storage is greater than 45000
+sbn pumpHash r9 On r0 #turn on "Vent" if conditions above
+sub r0 45001 r15 #subtract 45001 by storage to get difference below 45001
+div r0 r0 10 #divide by 10
+min r0 r0 10 #set r0 to between 0-10
+max r0 r0 0
+sub r1 r15 5001 #subtract storage by 5001 to get difference above 5001
+min r1 r1 10 #set r1 to between 0-10
+max r1 r1 0
+add r0 r0 r1 #add values of r0 and r1 (should be a value between 10-20)
+sub r0 r0 10 #subtract 10 to get a setting between 0-10, depending on proximity to 45000 or 5000
+sbn pumpHash r8 Setting r0 #set "Fill" volume setting by conditions above
+sgt r0 r14 5000 #set if Filter output pressure greater than 5000
+slt r1 r15 45000 #set if storage less than 45000
+and r0 r0 r1 #set if filter output is greater than 5000 AND storage is less than 45000
+sbn pumpHash r8 On r0 #turn on "Fill" if conditions above
+sub r0 r14 20000 #subtract filter output pressure from 20000
+sbn pumpHash r7 Setting r0 #set "InputVent" volume setting if greater than 20000
+sge r0 r14 20000 #set if filter output pressure greater than equal 20000
+sge r1 r15 45000 #set if storage greater than equal 45000
+and r0 r0 r1 #set if filter ouput pressure greater than equal 20000 AND if storage greater than equal 45000
+sge r1 r14 45000 #set if filter output pressure greater than equal 45000
+or r0 r0 r1 #set if previous AND statement in range OR if the filter output pressure greater than 45000
+sbn pumpHash r7 On r0 #set "InputVent" On setting to vent excess in input pipe by conditions above
+sgt r0 r13 20000 #set filter input pressure greater than 20000 (mixed gas pressure greater than 20000)
+sgtz r1 r10 #set if filter detects gas of its filtration type greater than 0% 
+and r0 r0 r1 #set if input pressure greater than 20000 and filtration detects gas it can filter
+sbn filterHash r6 Mode r0 #set to active filtration otherwise standby
+sgt r0 r12 2000 #set if waste pressure greater than 2000
+sbn pumpHash r5 On r0 #turn on "Waste Vent" if conditions above
+sub r0 19000 r11 #subtract 19000 by pressure to canister storage
+div r0 r0 10 #divide by 10
+sbn pumpHash r4 Setting r0 #set "CanFill" volume setting if less than 19000
+slt r0 r11 19000 #set if canister storage pressure less than 19000
+sbn pumpHash r4 On r0 #turn on "CanFill" if conditions above
+j ra #jump back to triggering jump statement in main loop
