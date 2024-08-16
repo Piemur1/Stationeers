@@ -4,7 +4,6 @@ alias StormShutters d2
 alias StormLights d3
 alias Weather r0
 alias Timer r1
-s ActiveVent PressureInwardSafety 2500
 CheckStorm:
 l Weather WeatherStation Weather
 beq 1 Weather StormInc
@@ -19,10 +18,10 @@ ble Timer 10 Shutdown
 sleep 1
 j Checktimer
 Shutdown:
-s StormShutters Open 1
+s StormShutters Open 0
 sleep 3
 s ActiveVent On 1
-sleep  5
+sleep  30
 s ActiveVent On 0
 WaitStorm:
 l Weather WeatherStation Weather
@@ -30,11 +29,12 @@ beq 0 Weather Open
 sleep 1
 j WaitStorm
 Open:
-s StormShutters Open 0
+s StormShutters Open 1
 s StormLights On 0
 s ActiveVent Direction 0
+s ActiveVent PressureInwardSafety 2500
 s ActiveVent On 1
-sleep 10
+sleep 30
 s ActiveVent On 0
 j CheckStorm
 
